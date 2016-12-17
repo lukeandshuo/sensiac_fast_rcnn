@@ -126,7 +126,7 @@ class sensiac(datasets.imdb):
 
     def _load_selective_search_roidb(self, gt_roidb):
         filename = os.path.abspath(os.path.join(self._devkit_path,
-                                                 + 'output.mat'))
+                                                 self._image_set+ '.mat'))
         assert os.path.exists(filename), \
                'Selective search data not found at: {}'.format(filename)
 	raw_data = sio.loadmat(filename)['all_boxes'].ravel()
