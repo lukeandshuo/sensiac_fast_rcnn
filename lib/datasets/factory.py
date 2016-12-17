@@ -9,33 +9,34 @@
 
 __sets = {}
 
-import datasets.pascal_voc
+import datasets.sensiac
+import os
 import numpy as np
-
-def _selective_search_IJCV_top_k(split, year, top_k):
-    """Return an imdb that uses the top k proposals from the selective search
-    IJCV code.
-    """
-    imdb = datasets.pascal_voc(split, year)
-    imdb.roidb_handler = imdb.selective_search_IJCV_roidb
-    imdb.config['top_k'] = top_k
-    return imdb
+#
+# def _selective_search_IJCV_top_k(split, year, top_k):
+#     """Return an imdb that uses the top k proposals from the selective search
+#     IJCV code.
+#     """
+#     imdb = datasets.pascal_voc(split, year)
+#     imdb.roidb_handler = imdb.selective_search_IJCV_roidb
+#     imdb.config['top_k'] = top_k
+#     return imdb
 
 # Set up voc_<year>_<split> using selective search "fast" mode
-for year in ['2007', '2012']:
-    for split in ['train', 'val', 'trainval', 'test']:
-        name = 'voc_{}_{}'.format(year, split)
-        __sets[name] = (lambda split=split, year=year:
-                datasets.pascal_voc(split, year))
+data_dir = os.path.join(os.path.abspath(__file__),'..','..','data','sample_data')
+for split in ['train','test']:
+        name = 'sensiac_{}'.format(split)
+        __sets[name] = (lambda split=split:
+                datasets.pascal_voc(split, data_dir))
 
 # Set up voc_<year>_<split>_top_<k> using selective search "quality" mode
 # but only returning the first k boxes
-for top_k in np.arange(1000, 11000, 1000):
-    for year in ['2007', '2012']:
-        for split in ['train', 'val', 'trainval', 'test']:
-            name = 'voc_{}_{}_top_{:d}'.format(year, split, top_k)
-            __sets[name] = (lambda split=split, year=year, top_k=top_k:
-                    _selective_search_IJCV_top_k(split, year, top_k))
+# for top_k in np.arange(1000, 11000, 1000):
+#     for year in ['2007', '2012']:
+#         for split in ['train', 'val', 'trainval', 'test']:
+#             name = 'voc_{}_{}_top_{:d}'.format(year, split, top_k)
+#             __sets[name] = (lambda split=split, year=year, top_k=top_k:
+#                     _selective_search_IJCV_top_k(split, year, top_k))
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""

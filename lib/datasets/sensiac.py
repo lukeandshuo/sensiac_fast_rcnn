@@ -126,7 +126,7 @@ class sensiac(datasets.imdb):
 
     def _load_selective_search_roidb(self, gt_roidb):
         filename = os.path.abspath(os.path.join(self._devkit_path,
-                                                self.name + '.mat'))
+                                                 + 'output.mat'))
         assert os.path.exists(filename), \
                'Selective search data not found at: {}'.format(filename)
 	raw_data = sio.loadmat(filename)['all_boxes'].ravel()
@@ -185,36 +185,26 @@ class sensiac(datasets.imdb):
         """
         filename = os.path.join(self._data_path, 'Annotations',self._image_type, self._image_set + '.txt')
         # print 'Loading: {}'.format(filename)
-	with open(filename) as f:
-            data = f.read()
-	import re
-	objs = re.findall('\(\d+, \d+\)[\s\-]+\(\d+, \d+\)', data)
-
-        num_objs = len(objs)
-
-        boxes = np.zeros((num_objs, 4), dtype=np.uint16)
-        gt_classes = np.zeros((num_objs), dtype=np.int32)
-        overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
-
-        # Load object bounding boxes into a data frame.
-        for ix, obj in enumerate(objs):
-            # Make pixel indexes 0-based
-	    coor = re.findall('\d+', obj)
-            x1 = float(coor[0])
-            y1 = float(coor[1])
-            x2 = float(coor[2])
-            y2 = float(coor[3])
-            cls = self._class_to_ind['vehicle']
-            boxes[ix, :] = [x1, y1, x2, y2]
-            gt_classes[ix] = cls
-            overlaps[ix, cls] = 1.0
-
-        overlaps = scipy.sparse.csr_matrix(overlaps)
-
-        return {'boxes' : boxes,
-                'gt_classes': gt_classes,
-                'gt_overlaps' : overlaps,
-                'flipped' : False}
+        gt_roidb = []
+        with open(filename) as f:
+            for line in f:
+                line = line.strip().split(",")
+                num_objs = 1
+                boxes = np.zeros((num_objs, 4), dtype=np.uint16)
+                gt_classes = np.zeros((num_objs), dtype=np.int32)
+                overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
+                for i in range(num_objs):
+                    x1 = float(line[0 + i * 4])
+                    y1 = float(line[1 + i * 4])
+                    x2 = float(line[2 + i * 4])
+                    y2 = float(line[3 + i * 4])
+                    cls = self._class_to_ind['vehicle']
+                    boxes[i,:] = [x1,y1,x2,y2]
+                    gt_classes[i]=cls
+                    overlaps[i,cls]=1.0
+                overlaps = scipy.sparse.csr_matrix(overlaps)
+                gt_roidb.append({'boxes': boxes, 'gt_classes': gt_classes, 'gt_overlaps': overlaps, 'flipped': False})
+        return gt_roidb
 
     def _write_sensiac_results_file(self, all_boxes):
         use_salt = self.config['use_salt']
@@ -269,6 +259,7 @@ class sensiac(datasets.imdb):
             self.config['cleanup'] = True
 
 if __name__ == '__main__':
-    d = datasets.sensiac('train', '')
+    data_dir = os.path.join(os.path.abspath(__file__),'..','..','data','sample_data')
+    d = datasets.sensiac('train', data_dir)
     res = d.roidb
     from IPython import embed; embed()
