@@ -20,7 +20,7 @@ if(~exist('mexFelzenSegmentIndex'))
 end
 
 % Configure
-im_width = 500;
+im_width = 640;
 
 % Parameters. Note that this controls the number of hierarchical
 % segmentations which are combined.
@@ -39,7 +39,7 @@ sigma = 0.8;
 
 % After segmentation, filter out boxes which have a width/height smaller
 % than minBoxWidth (default = 20 pixels).
-minBoxWidth = 20;
+minBoxWidth = 10;
 
 % Comment the following three lines for the 'quality' version
 colorTypes = colorTypes(1:2); % 'Fast' uses HSV and Lab
@@ -48,7 +48,9 @@ ks = ks(1:2);
 
 % Process all images.
 all_boxes = {};
+tic
 for i=1:length(image_filenames)
+    disp(length(image_filenames)-i)
     im = imread(image_filenames{i});
     % Resize image to canonical dimensions since proposals aren't scale invariant.
     scale = size(im, 2) / im_width;
@@ -81,6 +83,7 @@ for i=1:length(image_filenames)
 
     boxes = FilterBoxesWidth(boxes, minBoxWidth);
     boxes = BoxRemoveDuplicates(boxes);
+    toc
     all_boxes{i} = boxes;
 end
 
