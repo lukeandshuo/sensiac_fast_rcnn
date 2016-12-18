@@ -53,8 +53,7 @@ class sensiac(datasets.imdb):
         Construct an image path from the image's "index" identifier.
         """
         for ext in self._image_ext:
-            image_path = os.path.join(self._data_path, 'Imagery',self._image_type,'images'
-                                  index + ext)
+            image_path = os.path.join(self._data_path, 'Imagery',self._image_type,'images',index + ext)
             if os.path.exists(image_path):
                 break
         assert os.path.exists(image_path), \
@@ -179,7 +178,7 @@ class sensiac(datasets.imdb):
 
         return self.create_roidb_from_box_list(box_list, gt_roidb)
 
-    def _load_sensiac_annotation(self, index):
+    def _load_sensiac_annotation(self):
         """
         Load image and bounding boxes info from txt files of vehicle.
         """
@@ -259,7 +258,7 @@ class sensiac(datasets.imdb):
             self.config['cleanup'] = True
 
 if __name__ == '__main__':
-    data_dir = os.path.join(os.path.abspath(__file__),'..','..','data','sample_data')
+    data_dir = os.path.join(os.path.dirname(__file__),'..','..','data','sample_data')
     d = datasets.sensiac('train', data_dir)
     res = d.roidb
     from IPython import embed; embed()

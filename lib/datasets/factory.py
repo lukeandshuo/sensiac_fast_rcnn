@@ -23,11 +23,11 @@ import numpy as np
 #     return imdb
 
 # Set up voc_<year>_<split> using selective search "fast" mode
-data_dir = os.path.join(os.path.abspath(__file__),'..','..','data','sample_data')
+data_dir = os.path.join(os.path.dirname(__file__),'..','..','data','sample_data')
 for split in ['train','test']:
         name = 'sensiac_{}'.format(split)
         __sets[name] = (lambda split=split:
-                datasets.pascal_voc(split, data_dir))
+                datasets.sensiac(split, data_dir))
 
 # Set up voc_<year>_<split>_top_<k> using selective search "quality" mode
 # but only returning the first k boxes

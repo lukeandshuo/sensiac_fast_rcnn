@@ -18,7 +18,7 @@ import argparse
 import pprint
 import numpy as np
 import sys
-
+import time
 def parse_args():
     """
     Parse input arguments
@@ -86,7 +86,9 @@ if __name__ == '__main__':
 
     output_dir = get_output_dir(imdb, None)
     print 'Output will be saved to `{:s}`'.format(output_dir)
-
+    start = time.clock()
     train_net(args.solver, roidb, output_dir,
               pretrained_model=args.pretrained_model,
               max_iters=args.max_iters)
+    end = time.clock()
+    print end-start
