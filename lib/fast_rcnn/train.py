@@ -114,7 +114,7 @@ def get_training_roidb(imdb):
     return imdb.roidb
 
 def train_net(solver_prototxt, roidb, output_dir,
-              pretrained_model=None, max_iters=100000):
+              pretrained_model=None, max_iters=40000):
     """Train a Fast R-CNN network."""
     sw = SolverWrapper(solver_prototxt, roidb, output_dir,
                        pretrained_model=pretrained_model)
