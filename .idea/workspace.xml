@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="478b69dd-e90d-41b2-9492-b6d971ed896e" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/experiments/scripts/default_vgg_cnn_m_1024.sh" afterPath="$PROJECT_DIR$/experiments/scripts/default_vgg_cnn_m_1024.sh" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/demo.py" afterPath="$PROJECT_DIR$/tools/demo.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/test_net.py" afterPath="$PROJECT_DIR$/tools/test_net.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tools/train_net.py" afterPath="$PROJECT_DIR$/tools/train_net.py" />
     </list>
     <ignored path="FastRCNN.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -51,8 +47,8 @@
       <file leaf-file-name="demo.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/tools/demo.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="479">
-              <caret line="69" column="14" selection-start-line="69" selection-start-column="14" selection-end-line="69" selection-end-column="14" />
+            <state relative-caret-position="336">
+              <caret line="134" column="72" selection-start-line="134" selection-start-column="72" selection-end-line="134" selection-end-column="72" />
               <folding>
                 <element signature="e#391#409#0" expanded="true" />
               </folding>
@@ -138,8 +134,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
+    <option name="x" value="-29" />
+    <option name="y" value="220" />
     <option name="width" value="1280" />
-    <option name="height" value="800" />
+    <option name="height" value="735" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -239,7 +237,6 @@
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="/usr/bin/python" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="FullScreen" value="true" />
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
     <option name="remove_strategy" value="false" />
@@ -255,7 +252,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1280" height="800" extended-state="0" />
+    <frame x="-29" y="220" width="1280" height="735" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.31663975" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -408,8 +405,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tools/demo.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="479">
-          <caret line="69" column="14" selection-start-line="69" selection-start-column="14" selection-end-line="69" selection-end-column="14" />
+        <state relative-caret-position="336">
+          <caret line="134" column="72" selection-start-line="134" selection-start-column="72" selection-end-line="134" selection-end-column="72" />
           <folding>
             <element signature="e#391#409#0" expanded="true" />
           </folding>

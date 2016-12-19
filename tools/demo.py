@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     prototxt = os.path.join(cfg.ROOT_DIR, 'models', NETS[args.demo_net][0],
                             'test.prototxt')
-    caffemodel = os.path.join(cfg.ROOT_DIR, 'data', 'fast_rcnn_models',
+    caffemodel = os.path.join(cfg.ROOT_DIR, 'output', 'default','train',
                               NETS[args.demo_net][1])
 
     if not os.path.isfile(caffemodel):
