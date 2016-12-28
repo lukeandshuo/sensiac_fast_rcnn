@@ -214,18 +214,11 @@ class sensiac(datasets.imdb):
         return gt_roidb
 
     def _write_sensiac_results_file(self, all_boxes):
-        use_salt = self.config['use_salt']
-        comp_id = 'comp4'
-        if use_salt:
-            comp_id += '-{}'.format(os.getpid())
-
-        # VOCdevkit/results/comp4-44503_det_test_aeroplane.txt
-        path = os.path.join(self._devkit_path, 'results', self.name, comp_id + '_')
         for cls_ind, cls in enumerate(self.classes):
             if cls == '__background__':
                 continue
-            print 'Writing {} results file'.format(cls)
-            filename = path + 'det_' + self._image_set + '_' + cls + '.txt'
+            print 'Writing {} VOC results file'.format(cls)
+            filename = self._get_voc_results_file_template().format(cls)
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
                     dets = all_boxes[cls_ind][im_ind]
@@ -238,16 +231,16 @@ class sensiac(datasets.imdb):
                                        dets[k, 0] + 1, dets[k, 1] + 1,
                                        dets[k, 2] + 1, dets[k, 3] + 1))
         return comp_id
-            def _get_voc_results_file_template(self):
+    def _get_sensiac_results_file_template(self):
         # VOCdevkit/results/VOC2007/Main/<comp_id>_det_test_aeroplane.txt
         filename = self._get_comp_id() + '_det_' + self._image_set + '_{:s}.txt'
         path = os.path.join(
             self._devkit_path,
             'results',
-            'VOC' + self._year,
+            self._image_type,
             'Main',
             filename)
-        return path
+        return path    
 
     def _do_matlab_eval(self, comp_id, output_dir='output'):
         rm_results = self.config['cleanup']
@@ -264,29 +257,20 @@ class sensiac(datasets.imdb):
         status = subprocess.call(cmd, shell=True)
 
     def _do_python_eval(self, output_dir = 'output'):
-        annopath = os.path.join(
-            self._devkit_path,
-            'VOC' + self._year,
-            'Annotations',
-            '{:s}.xml')
-        imagesetfile = os.path.join(
-            self._devkit_path,
-            'VOC' + self._year,
-            'ImageSets',
-            'Main',
-            self._image_set + '.txt')
+        annopath = filename = os.path.join(self._data_path, 'Annotations',self._image_type, self._image_set + '.txt')
+        imagesetfile = os.path.join(self._data_path, 'Train_Test', self._image_type, self._image_set + '.txt')
         cachedir = os.path.join(self._devkit_path, 'annotations_cache')
         aps = []
         # The PASCAL VOC metric changed in 2010
-        use_07_metric = True if int(self._year) < 2010 else False
+        use_07_metric = True 
         print 'VOC07 metric? ' + ('Yes' if use_07_metric else 'No')
         if not os.path.isdir(output_dir):
             os.mkdir(output_dir)
         for i, cls in enumerate(self._classes):
             if cls == '__background__':
                 continue
-            filename = self._get_voc_results_file_template().format(cls)
-            rec, prec, ap = voc_eval(
+            filename = self._get_sensiac_results_file_template().format(cls)
+            rec, prec, ap = sensiac_eval(
                 filename, annopath, imagesetfile, cls, cachedir, ovthresh=0.5,
                 use_07_metric=use_07_metric)
             aps += [ap]
