@@ -9,23 +9,24 @@ import os
 import cPickle
 import numpy as np
 
-def parse_rec(filename):
+def parse_rec(filename,ind):
     """ Parse a PASCAL sensiac xml file """
-    tree = ET.parse(filename)
     objects = []
-    for obj in tree.findall('object'):
-        obj_struct = {}
-        obj_struct['name'] = obj.find('name').text
-        obj_struct['pose'] = obj.find('pose').text
-        obj_struct['truncated'] = int(obj.find('truncated').text)
-        obj_struct['difficult'] = int(obj.find('difficult').text)
-        bbox = obj.find('bndbox')
-        obj_struct['bbox'] = [int(bbox.find('xmin').text),
-                              int(bbox.find('ymin').text),
-                              int(bbox.find('xmax').text),
-                              int(bbox.find('ymax').text)]
-        objects.append(obj_struct)
-
+    with open(filename) as f:
+            for i,line in enumerate(f):
+                if i == ind:
+                    line = line.strip().split(",")
+                    num_objs = 1
+                    boxes = np.zeros((num_objs, 4), dtype=np.uint16)
+                    for i in range(num_objs):
+                        x1 = float(line[0 + i * 4])
+                        y1 = float(line[1 + i * 4])
+                        x2 = float(line[2 + i * 4])
+                        y2 = float(line[3 + i * 4])            
+                        boxes[i,:] = [x1,y1,x2,y2]
+                        gt_classes[i]="vehicle"
+                    objects.append({'bbox': boxes, 'name': gt_classes})
+                    break
     return objects
 
 def sensiac_ap(rec, prec, use_07_metric=False):
@@ -106,7 +107,7 @@ def sensiac_eval(detpath,
         # load annots
         recs = {}
         for i, imagename in enumerate(imagenames):
-            recs[imagename] = parse_rec(annopath.format(imagename))
+            recs[imagename] = parse_rec(annopath,i)
             if i % 100 == 0:
                 print 'Reading annotation for {:d}/{:d}'.format(
                     i + 1, len(imagenames))
@@ -125,13 +126,12 @@ def sensiac_eval(detpath,
     for imagename in imagenames:
         R = [obj for obj in recs[imagename] if obj['name'] == classname]
         bbox = np.array([x['bbox'] for x in R])
-        difficult = np.array([x['difficult'] for x in R]).astype(np.bool)
         det = [False] * len(R)
-        npos = npos + sum(~difficult)
+        npos = npos + len(bbox)
         class_recs[imagename] = {'bbox': bbox,
-                                 'difficult': difficult,
                                  'det': det}
-
+    print "npos:"+npos
+    print "image length:"+len(imagenames)
     # read dets
     detfile = detpath.format(classname)
     with open(detfile, 'r') as f:
@@ -179,12 +179,11 @@ def sensiac_eval(detpath,
             jmax = np.argmax(overlaps)
 
         if ovmax > ovthresh:
-            if not R['difficult'][jmax]:
-                if not R['det'][jmax]:
-                    tp[d] = 1.
-                    R['det'][jmax] = 1
-                else:
-                    fp[d] = 1.
+            if not R['det'][jmax]:
+                tp[d] = 1.
+                R['det'][jmax] = 1
+            else:
+                fp[d] = 1.
         else:
             fp[d] = 1.
 
