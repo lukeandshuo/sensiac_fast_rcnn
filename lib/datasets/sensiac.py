@@ -101,6 +101,8 @@ class sensiac(datasets.imdb):
 
         This function loads/saves from/to a cache file to speed up future calls.
         """
+        print "ss roi"
+
         cache_file = os.path.join(self.cache_path,
                                   self.name + '_selective_search_roidb.pkl')
 
@@ -110,7 +112,8 @@ class sensiac(datasets.imdb):
             print '{} ss roidb loaded from {}'.format(self.name, cache_file)
             return roidb
 
-        if self._image_set != 'test':
+        if self._image_set != 'test_real':
+            print 'yes'
             gt_roidb = self.gt_roidb()
             ss_roidb = self._load_selective_search_roidb(gt_roidb)
             roidb = datasets.imdb.merge_roidbs(gt_roidb, ss_roidb)
@@ -124,6 +127,7 @@ class sensiac(datasets.imdb):
         return roidb
 
     def _load_selective_search_roidb(self, gt_roidb):
+        print "load ss roi"
         filename = os.path.abspath(os.path.join(self._devkit_path,'ROI',
                                                  self._image_set+ '.mat'))
         assert os.path.exists(filename), \
@@ -183,6 +187,7 @@ class sensiac(datasets.imdb):
         Load image and bounding boxes info from txt files of vehicle.
         """
         filename = os.path.join(self._data_path, 'Annotations',self._image_type, self._image_set + '.txt')
+        print filename
         # print 'Loading: {}'.format(filename)
         gt_roidb = []
         with open(filename) as f:
@@ -190,18 +195,20 @@ class sensiac(datasets.imdb):
                 line = line.strip().split(",")
                 num_objs = 1
                 boxes = np.zeros((num_objs, 4), dtype=np.uint16)
+
                 gt_classes = np.zeros((num_objs), dtype=np.int32)
                 overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
                 for i in range(num_objs):
-                    x1 = float(line[0 + i * 4])
-                    y1 = float(line[1 + i * 4])
-                    x2 = float(line[2 + i * 4])
-                    y2 = float(line[3 + i * 4])
+                    x1 = float(line[0 + i * 4])-5
+                    y1 = float(line[1 + i * 4])-5
+                    x2 = float(line[2 + i * 4])+5
+                    y2 = float(line[3 + i * 4])+5
                     cls = self._class_to_ind['vehicle']
                     boxes[i,:] = [x1,y1,x2,y2]
                     gt_classes[i]=cls
                     overlaps[i,cls]=1.0
                 overlaps = scipy.sparse.csr_matrix(overlaps)
+                print boxes
                 gt_roidb.append({'boxes': boxes, 'gt_classes': gt_classes, 'gt_overlaps': overlaps, 'flipped': False})
         return gt_roidb
 

@@ -29,13 +29,13 @@ def parse_args():
                         default=0, type=int)
     parser.add_argument('--solver', dest='solver',
                         help='solver prototxt',
-                        default=None, type=str)
+                        default='models/VGG_CNN_M_1024/solver.prototxt', type=str)
     parser.add_argument('--iters', dest='max_iters',
                         help='number of iterations to train',
                         default=40000, type=int)
     parser.add_argument('--weights', dest='pretrained_model',
                         help='initialize with pretrained model weights',
-                        default=None, type=str)
+                        default='data/imagenet_models/VGG_CNN_M_1024.v2.caffemodel', type=str)
     parser.add_argument('--cfg', dest='cfg_file',
                         help='optional config file',
                         default=None, type=str)

@@ -31,43 +31,27 @@ CLASSES = ('__background__',
 NETS = {'vgg16': ('VGG16',
                   'vgg16_fast_rcnn_iter_40000.caffemodel'),
         'vgg_cnn_m_1024': ('VGG_CNN_M_1024',
-                           'vgg_cnn_m_1024_fast_rcnn_iter_100000.caffemodel'),
+                           'vgg_cnn_m_1024_fast_rcnn_iter_40000.caffemodel'),
         'caffenet': ('CaffeNet',
                      'caffenet_fast_rcnn_iter_40000.caffemodel')}
 
 
-def vis_detections(im, class_name, dets, thresh=0.5):
+def vis_detections(im, class_name, dets, gt,thresh=0.5):
     """Draw detected bounding boxes."""
     inds = np.where(dets[:, -1] >= thresh)[0]
     if len(inds) == 0:
         return
 
-    im = im[:, :, (2, 1, 0)]
-    fig, ax = plt.subplots(figsize=(12, 12))
-    ax.imshow(im, aspect='equal')
+
     for i in inds:
         bbox = dets[i, :4]
         score = dets[i, -1]
+        cv2.putText(im,'{:s} {:.3f}'.format(class_name,score),(int(bbox[0]),int(bbox[1]-3)),0,0.6,(0,0,255))
+        cv2.rectangle(im,(int(bbox[0]),int(bbox[1])),(int(bbox[2]),int(bbox[[3]])),(255,0,0),2)
+        #cv2.rectangle(im, (int(gt[0]), int(gt[1])), (int(gt[2]), int(gt[[3]])), (0, 255, 0), 2)
+        cv2.imshow("result",im)
+        cv2.waitKey(100)
 
-        ax.add_patch(
-            plt.Rectangle((bbox[0], bbox[1]),
-                          bbox[2] - bbox[0],
-                          bbox[3] - bbox[1], fill=False,
-                          edgecolor='red', linewidth=3.5)
-            )
-        ax.text(bbox[0], bbox[1] - 2,
-                '{:s} {:.3f}'.format(class_name, score),
-                bbox=dict(facecolor='blue', alpha=0.5),
-                fontsize=14, color='white')
-
-    ax.set_title(('{} detections with '
-                  'p({} | box) >= {:.1f}').format(class_name, class_name,
-                                                  thresh),
-                  fontsize=14)
-    plt.axis('off')
-    plt.tight_layout()
-    plt.draw()
-    plt.show()
 
 def demo(net,classes):
     """Detect object classes in an image using pre-computed object proposals."""
@@ -83,6 +67,7 @@ def demo(net,classes):
     imdb = get_imdb('sensiac_test')
     num_images = len(imdb.image_index)
     roidb = imdb.roidb
+    gt=imdb.gt_roidb()
     for i in xrange(num_images):
         im = cv2.imread(imdb.image_path_at(i))
 
@@ -95,9 +80,9 @@ def demo(net,classes):
                '{:d} object proposals').format(timer.total_time, boxes.shape[0])
 
         # Visualize detections for each class
-        CONF_THRESH = 0.8
+        CONF_THRESH = 0.6
         NMS_THRESH = 0.3
-        for cls in classes:
+        for ind, cls in enumerate(classes):
             cls_ind = CLASSES.index(cls)
             cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
             cls_scores = scores[:, cls_ind]
@@ -110,7 +95,7 @@ def demo(net,classes):
             dets = dets[keep, :]
             print 'All {} detections with p({} | box) >= {:.1f}'.format(cls, cls,
                                                                         CONF_THRESH)
-            vis_detections(im, cls, dets, thresh=CONF_THRESH)
+            vis_detections(im, cls, dets,gt[i]['boxes'][ind], thresh=CONF_THRESH)
 
 def parse_args():
     """Parse input arguments."""
