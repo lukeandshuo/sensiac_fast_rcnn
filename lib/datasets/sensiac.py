@@ -16,8 +16,8 @@ import scipy.io as sio
 import utils.cython_bbox
 import cPickle
 import subprocess
-
-
+import uuid
+from sensiac_eval import sensiac_eval
 class sensiac(datasets.imdb):
     def __init__(self, image_set, devkit_path):
         datasets.imdb.__init__(self, image_set)
@@ -30,6 +30,8 @@ class sensiac(datasets.imdb):
         self._image_ext = ['.png']
 	self._image_type = 'Visible'
         self._image_index = self._load_image_set_index()
+  	self._comp_id = 'comp1'
+        self._salt = str(uuid.uuid4())
         # Default to roidb handler
         self._roidb_handler = self.selective_search_roidb
 	
@@ -213,12 +215,15 @@ class sensiac(datasets.imdb):
                 gt_roidb.append({'boxes': boxes, 'gt_classes': gt_classes, 'gt_overlaps': overlaps, 'flipped': False})
         return gt_roidb
 
+    def _get_comp_id(self):
+        return self._comp_id
+
     def _write_sensiac_results_file(self, all_boxes):
         for cls_ind, cls in enumerate(self.classes):
             if cls == '__background__':
                 continue
             print 'Writing {} VOC results file'.format(cls)
-            filename = self._get_voc_results_file_template().format(cls)
+            filename = self._get_sensiac_results_file_template().format(cls)
             with open(filename, 'wt') as f:
                 for im_ind, index in enumerate(self.image_index):
                     dets = all_boxes[cls_ind][im_ind]
@@ -230,7 +235,7 @@ class sensiac(datasets.imdb):
                                 format(index, dets[k, -1],
                                        dets[k, 0] + 1, dets[k, 1] + 1,
                                        dets[k, 2] + 1, dets[k, 3] + 1))
-        return comp_id
+        return self._comp_id
     def _get_sensiac_results_file_template(self):
         # VOCdevkit/results/VOC2007/Main/<comp_id>_det_test_aeroplane.txt
         filename = self._get_comp_id() + '_det_' + self._image_set + '_{:s}.txt'
@@ -262,7 +267,7 @@ class sensiac(datasets.imdb):
         cachedir = os.path.join(self._devkit_path, 'annotations_cache')
         aps = []
         # The PASCAL VOC metric changed in 2010
-        use_07_metric = True 
+        use_07_metric = False 
         print 'VOC07 metric? ' + ('Yes' if use_07_metric else 'No')
         if not os.path.isdir(output_dir):
             os.mkdir(output_dir)

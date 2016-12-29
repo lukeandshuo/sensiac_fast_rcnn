@@ -8,24 +8,22 @@ import xml.etree.ElementTree as ET
 import os
 import cPickle
 import numpy as np
+import matplotlib.pyplot as plt
 
 def parse_rec(filename,ind):
     """ Parse a PASCAL sensiac xml file """
     objects = []
+
     with open(filename) as f:
             for i,line in enumerate(f):
                 if i == ind:
                     line = line.strip().split(",")
-                    num_objs = 1
-                    boxes = np.zeros((num_objs, 4), dtype=np.uint16)
-                    for i in range(num_objs):
-                        x1 = float(line[0 + i * 4])
-                        y1 = float(line[1 + i * 4])
-                        x2 = float(line[2 + i * 4])
-                        y2 = float(line[3 + i * 4])            
-                        boxes[i,:] = [x1,y1,x2,y2]
-                        gt_classes[i]="vehicle"
-                    objects.append({'bbox': boxes, 'name': gt_classes})
+                    x1 = float(line[0])-5
+                    y1 = float(line[1])-5
+                    x2 = float(line[2])+5
+                    y2 = float(line[3])+5          
+                    boxes = [x1,y1,x2,y2]
+                    objects.append({'bbox': boxes, 'name': 'vehicle'})
                     break
     return objects
 
@@ -49,7 +47,8 @@ def sensiac_ap(rec, prec, use_07_metric=False):
         # first append sentinel values at the end
         mrec = np.concatenate(([0.], rec, [1.]))
         mpre = np.concatenate(([0.], prec, [0.]))
-
+	print "rec:",mrec
+	print "pre",mpre
         # compute the precision envelope
         for i in range(mpre.size - 1, 0, -1):
             mpre[i - 1] = np.maximum(mpre[i - 1], mpre[i])
@@ -125,13 +124,15 @@ def sensiac_eval(detpath,
     npos = 0
     for imagename in imagenames:
         R = [obj for obj in recs[imagename] if obj['name'] == classname]
+	print "R",R
         bbox = np.array([x['bbox'] for x in R])
+	print "bbox",bbox
         det = [False] * len(R)
-        npos = npos + len(bbox)
+        npos = npos + 1
         class_recs[imagename] = {'bbox': bbox,
                                  'det': det}
-    print "npos:"+npos
-    print "image length:"+len(imagenames)
+    print "npos:",npos
+    print "image length:",len(imagenames)
     # read dets
     detfile = detpath.format(classname)
     with open(detfile, 'r') as f:
@@ -145,7 +146,9 @@ def sensiac_eval(detpath,
     # sort by confidence
     sorted_ind = np.argsort(-confidence)
     sorted_scores = np.sort(-confidence)
+    #print "Score:",sorted_scores
     BB = BB[sorted_ind, :]
+    #print "BBOX:",BB
     image_ids = [image_ids[x] for x in sorted_ind]
 
     # go down dets and mark TPs and FPs
@@ -157,7 +160,6 @@ def sensiac_eval(detpath,
         bb = BB[d, :].astype(float)
         ovmax = -np.inf
         BBGT = R['bbox'].astype(float)
-
         if BBGT.size > 0:
             # compute overlaps
             # intersection
@@ -179,6 +181,7 @@ def sensiac_eval(detpath,
             jmax = np.argmax(overlaps)
 
         if ovmax > ovthresh:
+	    print "find 1"
             if not R['det'][jmax]:
                 tp[d] = 1.
                 R['det'][jmax] = 1
@@ -191,9 +194,14 @@ def sensiac_eval(detpath,
     fp = np.cumsum(fp)
     tp = np.cumsum(tp)
     rec = tp / float(npos)
+    print "origin rec",rec
+    
     # avoid divide by zero in case the first detection matches a difficult
     # ground truth
     prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
+    print "origin",prec
+    plt.plot(rec,prec)
+    plt.show()
     ap = sensiac_ap(rec, prec, use_07_metric)
 
     return rec, prec, ap
